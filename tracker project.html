@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>College Assignment Submission Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f4f4f4;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .container {
+            background: blue;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        input, select, button {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        table, th, td {
+            border: 1px solid #000;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .dashboard {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            font-weight: bold;
+        }
+
+        .card {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>College Assignment Submission Tracker</h1>
+
+    <input type="text" id="title" placeholder="Assignment Title">
+
+    <input type="text" id="subject" placeholder="Subject">
+
+    <input type="date" id="dueDate">
+
+    <button onclick="addAssignment()">Add Assignment</button>
+
+    <br><br>
+
+    <label>Filter by Subject:</label>
+
+    <select id="filterSubject" onchange="displayAssignments()">
+        <option value="All">All Subjects</option>
+    </select>
+
+    <div class="dashboard">
+        <div class="card">
+            Submitted: <span id="submittedCount">0</span>
+        </div>
+
+        <div class="card">
+            Pending: <span id="pendingCount">0</span>
+        </div>
+
+        <div class="card">
+            Late: <span id="lateCount">0</span>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Subject</th>
+                <th>Due Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody id="assignmentList"></tbody>
+    </table>
+
+</div>
+
+<script>
+
+let assignments = [];
+
+function addAssignment() {
+
+    let title = document.getElementById("title").value;
+    let subject = document.getElementById("subject").value;
+    let dueDate = document.getElementById("dueDate").value;
+
+    if(title === "" || subject === "" || dueDate === "") {
+        alert("Please fill all fields");
+        return;
+    }
+
+    assignments.push({
+        title: title,
+        subject: subject,
+        dueDate: dueDate,
+        status: "Pending"
+    });
+
+    document.getElementById("title").value = "";
+    document.getElementById("subject").value = "";
+    document.getElementById("dueDate").value = "";
+
+    updateSubjects();
+    displayAssignments();
+}
+
+function updateSubjects() {
+
+    let subjects =
+    [...new Set(assignments.map(a => a.subject))];
+
+    let filter =
+    document.getElementById("filterSubject");
+
+    filter.innerHTML =
+    '<option value="All">All Subjects</option>';
+
+    subjects.forEach(subject => {
+
+        filter.innerHTML +=
+        `<option value="${subject}">
+        ${subject}
+        </option>`;
+    });
+}
+
+function displayAssignments() {
+
+    let filterValue =
+    document.getElementById("filterSubject").value;
+
+    let table =
+    document.getElementById("assignmentList");
+
+    table.innerHTML = "";
+
+    assignments.forEach((a,index) => {
+
+        if(filterValue === "All" ||
+           a.subject === filterValue){
+
+            table.innerHTML += `
+            <tr>
+                <td>${a.title}</td>
+                <td>${a.subject}</td>
+                <td>${a.dueDate}</td>
+                <td>
+                    <select onchange="changeStatus(${index},this.value)">
+                        <option ${a.status=="Pending"?"selected":""}>
+                        Pending
+                        </option>
+
+                        <option ${a.status=="Submitted"?"selected":""}>
+                        Submitted
+                        </option>
+
+                        <option ${a.status=="Late"?"selected":""}>
+                        Late
+                        </option>
+                    </select>
+                </td>
+            </tr>`;
+        }
+    });
+
+    updateDashboard();
+}
+
+function changeStatus(index,status){
+
+    assignments[index].status = status;
+
+    updateDashboard();
+}
+
+function updateDashboard(){
+
+    let submitted =
+    assignments.filter(a =>
+    a.status === "Submitted").length;
+
+    let pending =
+    assignments.filter(a =>
+    a.status === "Pending").length;
+
+    let late =
+    assignments.filter(a =>
+    a.status === "Late").length;
+
+    document.getElementById("submittedCount").innerText = submitted;
+    document.getElementById("pendingCount").innerText = pending;
+    document.getElementById("lateCount").innerText = late;
+}
+
+</script>
+
+</body>
+</html>
